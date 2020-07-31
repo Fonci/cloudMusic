@@ -15,7 +15,7 @@
         <span class="more">更多 》</span>
       </p>
       <div class="music_list">
-        <div v-for="(item,index) in musicList" :key="index"  @click="getMusicListDetail(item.id)">
+        <div v-for="(item,index) in musicList" :key="index" @click="getMusicListDetail(item.id)">
           <img class="recommand_music_pic" :src="item.picUrl" alt />
           <p class="listen_num">
             <i class="listen_icon"></i>
@@ -26,6 +26,7 @@
       </div>
     </div>
     <!-- 最新音乐 -->
+    <!-- 洗衣液 卫生纸  -->
     <div class="recommand_music">
       <p class="title">
         <span>最新音乐</span>
@@ -90,7 +91,6 @@ export default {
     },
     // 获取歌单详情
     async getMusicListDetail(id) {
-      console.log(1);
       const { data: res } = await this.$http.get("/playlist/detail", {
         params: {
           id: id,

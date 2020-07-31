@@ -5,7 +5,22 @@
 </template>
 
 <script>
-export default {};
+export default {
+  data() {
+    return {};
+  },
+  created() {
+    this.getRankList();
+  },
+  methods: {
+    // 获取所有的榜单 热歌榜 新歌榜 歌手榜 等等
+    async getRankList() {
+      const { data: res } = await this.$http.get("/toplist");
+      console.log(res);
+      // /toplist
+    },
+  },
+};
 </script>
 
 <style scoped>
