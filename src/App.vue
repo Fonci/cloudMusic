@@ -23,7 +23,7 @@ body,
 #app {
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 ul {
   list-style: none;
@@ -41,4 +41,5 @@ ul {
   height: 8px;
   border-radius: 50%;
 }
+
 </style>
