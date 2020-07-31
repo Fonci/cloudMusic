@@ -12,9 +12,10 @@
     <div class="recommand_music">
       <p class="title">
         <span>推荐歌单</span>
+        <span class="more">更多 》</span>
       </p>
       <div class="music_list">
-        <div v-for="(item,index) in musicList" :key="index">
+        <div v-for="(item,index) in musicList" :key="index"  @click="getMusicListDetail(item.id)">
           <img class="recommand_music_pic" :src="item.picUrl" alt />
           <p class="listen_num">
             <i class="listen_icon"></i>
@@ -28,17 +29,20 @@
     <div class="recommand_music">
       <p class="title">
         <span>最新音乐</span>
+        <span class="more">更多 》</span>
       </p>
       <div class="music_new">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
+        <div class="music_new_list" v-for="(item,index) in musicNew" :key="index">
+          <div style="width:90%;padding:15px 8px;">
+            <p style="font-size:17px;margin:0;">{{item.name}}</p>
+            <p style="font-size:12px;margin:0;margin-top:10px;color:gray;">
+              <span>{{item.song.artists[0].name}}</span>
+              <span v-if="item.song.artists.length>1">/{{item.song.artists[1].name}}</span>
+              - {{item.song.album.name}}
+            </p>
+          </div>
+          <div class="play"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -50,12 +54,14 @@ export default {
     return {
       bannerList: [], //轮播图数据
       musicList: [], //推荐歌单
+
       musicNew: [], //最新音乐
     };
   },
   created() {
     this.getCarousel();
     this.getRecommandMusic();
+    this.getMusicNew();
   },
   methods: {
     // 获取轮播图数据
@@ -78,8 +84,29 @@ export default {
       });
       if (res.code == 200) {
         this.musicList = res.result;
-        console.log(res.result);
+
+        // console.log(res.result);
       }
+    },
+    // 获取歌单详情
+    async getMusicListDetail(id) {
+      console.log(1);
+      const { data: res } = await this.$http.get("/playlist/detail", {
+        params: {
+          id: id,
+        },
+      });
+      console.log(res);
+      //  /playlist/detail?id=24381616
+    },
+    // 获取最新音乐
+    async getMusicNew() {
+      // /personalized/newsong
+      const { data: res } = await this.$http.get("/personalized/newsong");
+      if (res.code == 200) {
+        this.musicNew = res.result;
+      }
+      // console.log(res.result);
     },
   },
 };
@@ -107,7 +134,8 @@ export default {
 .title {
   border-left: 3px solid #8991f7;
   padding-left: 10px;
-  text-align: left;
+  display: flex;
+  justify-content: space-between;
 }
 .music_list,
 .music_new {
@@ -124,7 +152,7 @@ export default {
   border-radius: 3px;
   z-index: -1;
 }
-.music_list div {
+.music_list > div {
   width: 33%;
   height: 180px;
   border-radius: 3px;
@@ -132,10 +160,9 @@ export default {
   margin-right: 1px;
   position: relative;
 }
-.music_new div {
+.music_new > div {
   width: 100%;
-  padding: 15px;
-  border: 1px solid goldenrod;
+  border-bottom: 1px solid rgba(220, 220, 220, 0.747);
 }
 .listen_num {
   color: white;
@@ -158,7 +185,24 @@ export default {
   position: absolute;
   left: 0;
   top: 125px;
-  margin:0;
+  margin: 0;
   text-align: left;
+}
+.more {
+  color: gray;
+  font-size: 12px;
+}
+.music_new_list {
+  display: flex;
+  justify-content: space-around;
+  text-align: left;
+}
+.play {
+  width: 25px;
+  height: 25px;
+  background: url(../assets/play.png) no-repeat 0 0;
+  background-size: cover;
+  margin-top: 25px;
+  margin-right: 10px;
 }
 </style>
