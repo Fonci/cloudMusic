@@ -1,9 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import index from '@/components/index'
-import recommand from '@/components/recommand' //推荐
+import index from '@/components/index' //首页
+import recommand from '@/components/recommand' //推荐页面
 import rankList from '@/components/rankList' //排行榜
-import search from '@/components/search' //搜索
+import search from '@/components/search' //搜索页面
+import musicListDetail from '@/components/musicListDetail' //歌单详情页
+
 
 
 
@@ -15,7 +17,7 @@ export default new Router({
         path: '/',
         name: 'index',
         component: index,
-        redirect: '/recommand', //推荐直接显示在首页
+        redirect: '/recommand', //进入首页 直接显示推荐页面
         children: [{
             path: '/recommand',
             component: recommand
@@ -26,5 +28,8 @@ export default new Router({
             path: '/search',
             component: search
         }]
+    }, {
+        path: '/musicListDetail',
+        component: musicListDetail
     }]
 })

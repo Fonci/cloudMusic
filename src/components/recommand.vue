@@ -26,7 +26,6 @@
       </div>
     </div>
     <!-- 最新音乐 -->
-    <!-- 洗衣液 卫生纸  -->
     <div class="recommand_music">
       <p class="title">
         <span>最新音乐</span>
@@ -55,7 +54,6 @@ export default {
     return {
       bannerList: [], //轮播图数据
       musicList: [], //推荐歌单
-
       musicNew: [], //最新音乐
     };
   },
@@ -91,12 +89,12 @@ export default {
     },
     // 获取歌单详情
     async getMusicListDetail(id) {
-      const { data: res } = await this.$http.get("/playlist/detail", {
-        params: {
-          id: id,
-        },
-      });
-      console.log(res);
+      // 存储所点击歌单的id,获取歌单详情页面数据
+      window.sessionStorage.setItem("MusicListId", id);
+      // 点击进入歌单详情页
+      this.$router.push("/musicListDetail");
+
+    
       //  /playlist/detail?id=24381616
     },
     // 获取最新音乐
@@ -121,7 +119,6 @@ export default {
 .carousel {
   width: 100%;
   height: 150px;
-  background-color: pink;
 }
 .banner {
   width: 100%;
@@ -182,11 +179,23 @@ export default {
   width: 100%;
   height: auto;
   font-size: 14px;
+  padding: 0 4px;
   position: absolute;
   left: 0;
   top: 125px;
   margin: 0;
   text-align: left;
+  /* 设置文本只显示两行，溢出的使用...代替 */
+  overflow: hidden;
+  /* 超出隐藏 */
+  text-overflow: ellipsis;
+  /* 超出文本设置为... */
+  display: -webkit-box;
+  /* 转换为盒子模型 */
+  -webkit-line-clamp: 2;
+  /* 设置文本为2行 */
+  -webkit-box-orient: vertical;
+  /* 从顶部向底部垂直布置子元素 */
 }
 .more {
   color: gray;
