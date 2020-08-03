@@ -32,7 +32,12 @@
         <span class="more">更多 》</span>
       </p>
       <div class="music_new">
-        <div class="music_new_list" v-for="(item,index) in musicNew" :key="index">
+        <div
+          class="music_new_list"
+          v-for="(item,index) in musicNew"
+          :key="index"
+          @click="goListen()"
+        >
           <div style="width:90%;padding:15px 8px;">
             <p style="font-size:17px;margin:0;">{{item.name}}</p>
             <p style="font-size:12px;margin:0;margin-top:10px;color:gray;">
@@ -83,8 +88,6 @@ export default {
       });
       if (res.code == 200) {
         this.musicList = res.result;
-
-        // console.log(res.result);
       }
     },
     // 获取歌单详情
@@ -93,18 +96,17 @@ export default {
       window.sessionStorage.setItem("MusicListId", id);
       // 点击进入歌单详情页
       this.$router.push("/musicListDetail");
-
-    
-      //  /playlist/detail?id=24381616
     },
     // 获取最新音乐
     async getMusicNew() {
-      // /personalized/newsong
       const { data: res } = await this.$http.get("/personalized/newsong");
       if (res.code == 200) {
         this.musicNew = res.result;
       }
-      // console.log(res.result);
+    },
+    // 进入听歌页面
+    goListen() {
+      this.$router.push("/listen");
     },
   },
 };

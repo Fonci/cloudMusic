@@ -57,7 +57,7 @@
     >歌曲列表</p>
     <!-- 歌单列表 -->
     <div class="musicList">
-      <div class="music" v-for="(song,index) in songs" :key="index">
+      <div class="music" v-for="(song,index) in songs" :key="index" @click="goListen()">
         <div class="order">{{index+1}}</div>
         <div style="width:85%;padding:15px 8px;">
           <p
@@ -132,6 +132,10 @@ export default {
     // 看到更多信息
     showMoreInfo() {
       this.showMore = !this.showMore;
+    },
+    // 进入听歌页面
+    goListen() {
+      this.$router.push("/listen");
     },
   },
 };
