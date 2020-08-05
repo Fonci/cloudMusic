@@ -3,13 +3,21 @@
     <!-- 遮罩背景 -->
     <div class="bg" :style="{'background-image':'url('+musicPic+')'}"></div>
     <!-- 歌曲封面 -->
-    <div class="pic_box">
+    <div class="pic_box" v-if="showPic" @click="showLyricPage()">
       <div class="circle">
         <img class="picture" :src="musicPic" alt />
       </div>
+      <p class="little_lyric">{{lyric}}</p>
     </div>
     <!-- 歌词 -->
-    <div class="lyric"></div>
+    <div class="lyric" v-if="showLyric" @click="showLyricPage()">
+      <!-- <div class="lyric_box">
+        <p v-for="(item,index) in musicLyric" :key="index">{{item[1]}}</p>
+      </div>-->
+      <p style="color:green;">{{lyric}}</p>
+      <p>{{lyric2}}</p>
+      <p>{{lyric3}}</p>
+    </div>
     <!-- 按钮组 -->
     <div class="btns">
       <!-- 顺序icon -->
@@ -17,12 +25,27 @@
       <!-- 播放 icon -->
       <div class="playbtn">
         <img src="../assets/last.png" alt class="play_icon" />
-        <img src="../assets/pause.png" alt class="play_icon" />
+        <img
+          v-if="showPlayIcon"
+          src="../assets/play_white.png"
+          alt
+          class="play_icon"
+          @click="playMusic()"
+        />
+        <img
+          v-if="showPauseIcon"
+          src="../assets/pause.png"
+          alt
+          class="play_icon"
+          @click="playMusic()"
+        />
         <img src="../assets/next.png" alt class="play_icon" />
       </div>
       <!-- 收藏 icon -->
       <img src="../assets/heart.png" alt class="play_icon" />
     </div>
+    <!-- 播放源 -->
+    <audio ref="audio" :src="musicUrl" autoplay></audio>
   </div>
 </template>
 
@@ -33,10 +56,21 @@ export default {
       musicId: "", //当前歌曲id
       musicPic: "", //歌曲封面
       musicUrl: "", //播放链接
-      musicLyric: "", //歌词
+      showPic: true, //显示pic页面
+      showLyric: false, //显示歌词页面
+      musicLyric: [], //歌词
       showPlayIcon: false, //显示播放按钮
-    };
+      showPauseIcon: true, //显示暂停按钮
+      i: 1, //控制播放暂停
+      currentTime: "",
+      timmer: "",
+      flag: 0, //控制歌词时间
+      lyric: "",
+      lyric2: "",
+      lyric3: "",
+    }; //
   },
+  mounted() {},
   created() {
     this.musicId = window.sessionStorage.getItem("musicId");
     this.getMusic(this.musicId);
@@ -51,7 +85,6 @@ export default {
           ids: id,
         },
       });
-      // console.log(res.songs[0]);
       this.musicPic = res.songs[0].al.picUrl;
     },
     // 获取歌词
@@ -61,7 +94,25 @@ export default {
           id: id,
         },
       });
-      this.musicLyric = res.lrc.lyric;
+
+      var arr = res.lrc.lyric.split("\n");
+      var timeArr = [];
+      var timeReg = /\[\d{2}:\d{2}\.\d{3}\]/g;
+
+      for (var i in arr) {
+        var time = arr[i].match(timeReg); //切割出所有的时间
+        var value = arr[i].replace(timeReg, ""); //获取纯歌词文本
+        if (time) {
+          for (let j = 0; j < time.length; j++) {
+            let t = time[j].slice(1, -1).split(":"); //t[0]分钟，t[1]秒
+            let timeArr = parseInt(t[0], 10) * 60 + parseFloat(t[1]);
+            this.musicLyric.push([timeArr, value]); //以[时间(秒)，歌词]的形式存进result
+          }
+        }
+      }
+      if (this.musicLyric) {
+        this.playLyric();
+      }
     },
     // 获取歌曲播放url
     async getMusicUrl(id) {
@@ -71,7 +122,57 @@ export default {
         },
       });
       this.musicUrl = res.data[0].url;
+      if (this.musicUrl) {
+        this.$refs.audio.autoplay = true;
+        this.timmer = setInterval(this.playLyric, 50); //定时器
+      }
     },
+    // 播放歌曲
+    playMusic() {
+      this.i += 1;
+      if (this.i % 2 == 0) {
+        this.$refs.audio.pause();
+        clearInterval(this.timmer);
+      } else {
+        this.$refs.audio.play();
+        this.timmer = setInterval(this.playLyric, 50);
+      }
+      this.showPlayIcon = !this.showPlayIcon;
+      this.showPauseIcon = !this.showPauseIcon;
+    },
+    // 显示歌词页面
+    showLyricPage() {
+      this.showPic = !this.showPic;
+      this.showLyric = !this.showLyric;
+    },
+
+    // 播放歌词
+    playLyric() {
+      this.currentTime = this.$refs.audio.currentTime;
+      if (this.currentTime) {
+        if (
+          this.currentTime > this.musicLyric[this.flag][0] &&
+          this.currentTime < this.musicLyric[this.flag + 1][0]
+        ) {
+          this.lyric = this.musicLyric[this.flag][1];
+          this.lyric2 = this.musicLyric[this.flag + 1][1];
+          this.lyric3 = this.musicLyric[this.flag + 2][1];
+        }
+        this.flag =
+          this.flag === this.musicLyric.length - 2 ? 0 : this.flag + 1;
+      }
+      if (
+        this.currentTime > this.$refs.audio.duration ||
+        this.currentTime == this.$refs.audio.duration
+      ) {
+        this.showPauseIcon = true;
+        this.showPlayIcon = false;
+      }
+    },
+  },
+  beforeDestroy() {
+    //页面关闭时清除定时器
+    clearInterval(this.timmer);
   },
 };
 </script>
@@ -85,7 +186,6 @@ export default {
   bottom: 0;
   right: 0;
   background: rgba(0, 0, 0, 0.575);
-  padding: 10px;
 }
 .bg {
   position: absolute;
@@ -104,6 +204,21 @@ export default {
 
 .pic_box {
   padding: 80px 20px;
+  position: fixed;
+  top: 50px;
+  left: 0;
+  right: 0;
+  bottom: 90px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.432);
+}
+.little_lyric {
+  width: 100%;
+  position: absolute;
+  bottom: 50px;
+  left: 0;
+  text-align: center;
+  color: green;
+  /* border:1px solid red; */
 }
 .circle {
   width: 300px;
@@ -130,10 +245,25 @@ export default {
 }
 
 .lyric {
-  width: 100%;
-  height: auto;
-  padding: 15px 10px;
+  padding: 100px 20px;
+  position: fixed;
+  top: 50px;
+  left: 0;
+  right: 0;
+  bottom: 75px;
   color: white;
+  border: 1px solid green;
+}
+.lyric_box {
+  width: 70%;
+  height: 100%;
+  margin: 0 auto;
+  padding: 40px 30px;
+  border: 1px solid red;
+  overflow: hidden;
+}
+.lyric_box p {
+  overflow: hidden;
 }
 .btns {
   width: 100%;
