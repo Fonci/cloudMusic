@@ -59,14 +59,16 @@
     <div class="musicList">
       <div class="music" v-for="(song,index) in songs" :key="index" @click="goListen()">
         <div class="order">{{index+1}}</div>
-        <div style="width:85%;padding:15px 8px;">
+        <div style="width:85%;padding:15px 8px;overflow:hidden;">
           <p
             style="font-size:17px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
           >
             {{song.name}}
             <span style="color:#888;" v-if="song.alia[0]">({{song.alia[0]}})</span>
           </p>
-          <p style="font-size:12px;margin:0;margin-top:10px;color:gray;">
+          <p
+            style="font-size:12px;margin:0;margin-top:10px;color:gray;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+          >
             <span>{{song.ar[0].name}}</span>
             <span>-</span>
             {{song.al.name}}

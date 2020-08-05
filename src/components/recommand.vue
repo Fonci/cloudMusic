@@ -36,7 +36,7 @@
           class="music_new_list"
           v-for="(item,index) in musicNew"
           :key="index"
-          @click="goListen()"
+          @click="goListen(item.id)"
         >
           <div style="width:90%;padding:15px 8px;">
             <p style="font-size:17px;margin:0;">{{item.name}}</p>
@@ -105,8 +105,9 @@ export default {
       }
     },
     // 进入听歌页面
-    goListen() {
+    goListen(id) {
       this.$router.push("/listen");
+      window.sessionStorage.setItem("musicId", id);
     },
   },
 };
