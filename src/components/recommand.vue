@@ -107,6 +107,7 @@ export default {
     // 进入听歌页面
     goListen(id) {
       this.$router.push("/listen");
+      // 播放歌曲的id 传给播放页面
       window.sessionStorage.setItem("musicId", id);
     },
   },

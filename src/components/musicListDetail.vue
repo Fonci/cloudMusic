@@ -1,4 +1,5 @@
 <template>
+  <!-- 歌单详情列表 -->
   <div class="wrap">
     <!-- 歌单信息 -->
     <div class="musicListInfo">
@@ -11,7 +12,7 @@
           <span class="musicList_icon">歌单</span>
           <p class="listen_num">
             <i class="listen_icon"></i>
-            <span>231.0万</span>
+            <span>{{(playlist.playCount/10000).toFixed(2)}}万</span>
           </p>
         </div>
         <div style="margin-left:30px;width:60%;">
@@ -57,7 +58,7 @@
     >歌曲列表</p>
     <!-- 歌单列表 -->
     <div class="musicList">
-      <div class="music" v-for="(song,index) in songs" :key="index" @click="goListen()">
+      <div class="music" v-for="(song,index) in songs" :key="index" @click="goListen(song.id)">
         <div class="order">{{index+1}}</div>
         <div style="width:85%;padding:15px 8px;overflow:hidden;">
           <p
@@ -70,6 +71,7 @@
             style="font-size:12px;margin:0;margin-top:10px;color:gray;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
           >
             <span>{{song.ar[0].name}}</span>
+            <span v-if="song.ar.length>1">/{{song.ar[1].name}}</span>
             <span>-</span>
             {{song.al.name}}
           </p>
@@ -89,6 +91,7 @@ export default {
       playlist: {
         creator: {},
         tags: {},
+        description: "",
       },
       ids: "",
       songs: {},
@@ -136,7 +139,10 @@ export default {
       this.showMore = !this.showMore;
     },
     // 进入听歌页面
-    goListen() {
+    goListen(id) {
+      // 播放歌曲的id 传给播放页面
+      window.sessionStorage.setItem("musicId", id);
+      // 进入播放页面
       this.$router.push("/listen");
     },
   },
@@ -255,16 +261,18 @@ p {
   border-radius: 10px;
 }
 .intro {
+  white-space: pre;
   font-size: 12px;
   color: #666;
   overflow: hidden;
+  text-align: left;
   /* 超出隐藏 */
   text-overflow: ellipsis;
   /* 超出文本设置为... */
   display: -webkit-box;
   /* 转换为盒子模型 */
   -webkit-line-clamp: 3;
-  /* 设置文本为2行 */
+  /* 设置文本为3行 */
   -webkit-box-orient: vertical;
   /* 从顶部向底部垂直布置子元素 */
 }
@@ -273,6 +281,8 @@ p {
   white-space: normal;
   font-size: 12px;
   color: #666;
+  /* white-space: pre;  空白会被浏览器保留 其行为方式类似 HTML 中的 <pre> 标签 */
+  white-space: pre;
 }
 .music {
   display: flex;

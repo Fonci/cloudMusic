@@ -2,21 +2,35 @@
   <div class="wrap">
     <!-- 遮罩背景 -->
     <div class="bg" :style="{'background-image':'url('+musicPic+')'}"></div>
+    <!-- 歌名 歌手 -->
+    <div class="aboutMusic">
+      <p>{{musicName}}</p>
+      <p style="color:#666;font-size:13px;margin-top:5px;">
+        <span v-for="(item,index) in singer" :key="index">{{item.name}}&emsp;</span>
+      </p>
+    </div>
     <!-- 歌曲封面 -->
     <div class="pic_box" v-if="showPic" @click="showLyricPage()">
       <div class="circle">
-        <img class="picture" :src="musicPic" alt />
+        <img
+          class="picture"
+          :src="musicPic"
+          alt
+          :style="{'animation':rotate?'rotate 10s linear infinite':'none'}"
+        />
       </div>
+      <!-- 小歌词 -->
       <p class="little_lyric">{{lyric}}</p>
     </div>
-    <!-- 歌词 -->
+    <!-- 大歌词面板-->
     <div class="lyric" v-if="showLyric" @click="showLyricPage()">
-      <!-- <div class="lyric_box">
-        <p v-for="(item,index) in musicLyric" :key="index">{{item[1]}}</p>
-      </div>-->
-      <p style="color:green;">{{lyric}}</p>
-      <p>{{lyric2}}</p>
-      <p>{{lyric3}}</p>
+      <div class="lyric_box">
+        <div
+          v-for="(item,index) in musicLyric"
+          :key="index"
+          :style="{'color':lyric==item[1]?'rgb(48, 139, 48)':'rgba(197, 188, 188, 0.884)'}"
+        >{{item[1]}}</div>
+      </div>
     </div>
     <!-- 按钮组 -->
     <div class="btns">
@@ -53,6 +67,9 @@
 export default {
   data() {
     return {
+      musicName: "",
+      singer: [],
+      rotate: true, //图片旋转
       musicId: "", //当前歌曲id
       musicPic: "", //歌曲封面
       musicUrl: "", //播放链接
@@ -73,9 +90,11 @@ export default {
   mounted() {},
   created() {
     this.musicId = window.sessionStorage.getItem("musicId");
-    this.getMusic(this.musicId);
-    this.getLyric(this.musicId);
-    this.getMusicUrl(this.musicId);
+    this.$nextTick(() => {
+      this.getMusic(this.musicId);
+      this.getLyric(this.musicId);
+      this.getMusicUrl(this.musicId);
+    });
   },
   methods: {
     // 获取歌曲封面
@@ -85,7 +104,9 @@ export default {
           ids: id,
         },
       });
-      this.musicPic = res.songs[0].al.picUrl;
+      this.singer = res.songs[0].ar; //歌手名 数组
+      this.musicName = res.songs[0].al.name; //歌名
+      this.musicPic = res.songs[0].al.picUrl; //封面图片
     },
     // 获取歌词
     async getLyric(id) {
@@ -98,7 +119,6 @@ export default {
       var arr = res.lrc.lyric.split("\n");
       var timeArr = [];
       var timeReg = /\[\d{2}:\d{2}\.\d{3}\]/g;
-
       for (var i in arr) {
         var time = arr[i].match(timeReg); //切割出所有的时间
         var value = arr[i].replace(timeReg, ""); //获取纯歌词文本
@@ -111,6 +131,7 @@ export default {
         }
       }
       if (this.musicLyric) {
+        this.timmer = setInterval(this.playLyric, 200); //定时器
         this.playLyric();
       }
     },
@@ -123,8 +144,7 @@ export default {
       });
       this.musicUrl = res.data[0].url;
       if (this.musicUrl) {
-        this.$refs.audio.autoplay = true;
-        this.timmer = setInterval(this.playLyric, 50); //定时器
+        // this.timmer = setInterval(this.playLyric,200); //定时器
       }
     },
     // 播放歌曲
@@ -135,17 +155,17 @@ export default {
         clearInterval(this.timmer);
       } else {
         this.$refs.audio.play();
-        this.timmer = setInterval(this.playLyric, 50);
+        this.timmer = setInterval(this.playLyric, 200);
       }
       this.showPlayIcon = !this.showPlayIcon;
       this.showPauseIcon = !this.showPauseIcon;
+      this.rotate = !this.rotate;
     },
     // 显示歌词页面
     showLyricPage() {
       this.showPic = !this.showPic;
       this.showLyric = !this.showLyric;
     },
-
     // 播放歌词
     playLyric() {
       this.currentTime = this.$refs.audio.currentTime;
@@ -155,8 +175,6 @@ export default {
           this.currentTime < this.musicLyric[this.flag + 1][0]
         ) {
           this.lyric = this.musicLyric[this.flag][1];
-          this.lyric2 = this.musicLyric[this.flag + 1][1];
-          this.lyric3 = this.musicLyric[this.flag + 2][1];
         }
         this.flag =
           this.flag === this.musicLyric.length - 2 ? 0 : this.flag + 1;
@@ -178,6 +196,9 @@ export default {
 </script>
 
 <style scoped>
+p {
+  margin: 0;
+}
 .wrap {
   width: 100%;
   position: fixed;
@@ -201,7 +222,12 @@ export default {
   transform: scale(1.5);
   z-index: -1;
 }
-
+.aboutMusic {
+  text-align: left;
+  color: white;
+  padding: 5px 0 5px 10px;
+  background-color: rgba(255, 255, 255, 0.096);
+}
 .pic_box {
   padding: 80px 20px;
   position: fixed;
@@ -209,7 +235,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 90px;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.432);
+  border-bottom: 1px solid rgba(128, 128, 128, 0.219);
 }
 .little_lyric {
   width: 100%;
@@ -217,7 +243,7 @@ export default {
   bottom: 50px;
   left: 0;
   text-align: center;
-  color: green;
+  color: rgb(48, 139, 48);
   /* border:1px solid red; */
 }
 .circle {
@@ -233,7 +259,7 @@ export default {
   border-radius: 50%;
   margin-top: 50px;
   border: 1px solid transparent;
-  animation: rotate 10s linear infinite;
+  /* animation: rotate 10s linear infinite; */
 }
 @keyframes rotate {
   0% {
@@ -243,27 +269,30 @@ export default {
     transform: rotate(360deg);
   }
 }
-
 .lyric {
   padding: 100px 20px;
   position: fixed;
   top: 50px;
   left: 0;
   right: 0;
-  bottom: 75px;
+  bottom: 90px;
   color: white;
-  border: 1px solid green;
+  /* border: 1px solid rgba(0, 128, 0, 0.308); */
 }
 .lyric_box {
   width: 70%;
-  height: 100%;
+  height: 80%;
   margin: 0 auto;
-  padding: 40px 30px;
-  border: 1px solid red;
-  overflow: hidden;
+  border: 1px solid rgba(255, 0, 0, 0.486);
+  /* overflow: hidden; */
+  position: relative;
 }
-.lyric_box p {
+.lyric_box div {
+  margin-bottom: 5px;
   overflow: hidden;
+
+  top: 0;
+  left: 0;
 }
 .btns {
   width: 100%;
