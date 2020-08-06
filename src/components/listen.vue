@@ -115,7 +115,6 @@ export default {
           id: id,
         },
       });
-
       var arr = res.lrc.lyric.split("\n");
       var timeArr = [];
       var timeReg = /\[\d{2}:\d{2}\.\d{3}\]/g;
