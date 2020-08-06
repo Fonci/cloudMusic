@@ -20,7 +20,7 @@
         />
       </div>
       <!-- 小歌词 -->
-      <p class="little_lyric">{{lyric}}</p>
+      <!-- <p class="little_lyric">{{lyric}}</p> -->
     </div>
     <!-- 大歌词面板-->
     <div class="lyric" v-if="showLyric" @click="showLyricPage()">
@@ -28,7 +28,7 @@
         <div
           v-for="(item,index) in musicLyric"
           :key="index"
-          :style="{'color':lyric===item[1]?'rgb(48, 139, 48)':'rgba(197, 188, 188, 0.884)'}"
+          :style="{'color':'rgba(197, 188, 188, 0.884)'}"
         >{{item[1]}}</div>
       </div>
     </div>
@@ -82,6 +82,7 @@ export default {
       showPauseIcon: true, //显示暂停按钮
       i: 1, //控制播放暂停
       currentTime: "",
+      duration: "",
       timmer: "",
       flag: 0, //控制歌词时间
 
@@ -120,7 +121,7 @@ export default {
         },
       });
       this.singer = res.songs[0].ar; //歌手名 数组
-      this.musicName = res.songs[0].al.name; //歌名
+      this.musicName = res.songs[0].name; //歌名
       this.musicPic = res.songs[0].al.picUrl; //封面图片
     },
     // 获取歌词
@@ -130,24 +131,25 @@ export default {
           id: id,
         },
       });
-      var arr = res.lrc.lyric.split("\n");
-      var timeArr = [];
-      var timeReg = /\[\d{2}:\d{2}\.\d{3}\]/g;
-      this.musicLyric = [];
-      for (var i in arr) {
-        var time = arr[i].match(timeReg); //切割出所有的时间
-        var value = arr[i].replace(timeReg, ""); //获取纯歌词文本
-        if (time) {
-          for (let j = 0; j < time.length; j++) {
-            let t = time[j].slice(1, -1).split(":"); //t[0]分钟，t[1]秒
-            let timeArr = parseInt(t[0], 10) * 60 + parseFloat(t[1]);
-            this.musicLyric.push([timeArr, value]); //以[时间(秒)，歌词]的形式存进result
+      // 判断歌词是否为空
+      if (res.lrc) {
+        var arr = res.lrc.lyric.split("\n");
+        var timeArr = [];
+        var timeReg = /\[\d{2}:\d{2}\.\d{3}\]/g;
+        this.musicLyric = [];
+        for (var i in arr) {
+          var time = arr[i].match(timeReg); //切割出时间
+          var value = arr[i].replace(timeReg, ""); //获取歌词
+          if (time) {
+            for (let j = 0; j < time.length; j++) {
+              let t = time[j].slice(1, -1).split(":"); //t[0]分钟，t[1]秒
+              let timeArr = parseInt(t[0], 10) * 60 + parseFloat(t[1]);
+              this.musicLyric.push([timeArr, value]); //以[时间(秒)，歌词]的形式存进result
+            }
           }
         }
-      }
-      if (this.musicLyric) {
-        this.timmer = setInterval(this.playLyric, 200); //定时器
-        this.playLyric();
+      } else {
+        this.musicLyric.push([0, "暂无歌词"]);
       }
     },
     // 获取歌曲播放url
@@ -160,6 +162,12 @@ export default {
       this.musicUrl = res.data[0].url;
       if (this.musicUrl) {
         window.sessionStorage.setItem("musicUrl", this.musicUrl);
+        this.timmer = setInterval(() => {
+          if (this.$refs.audio) {
+            this.currentTime = this.$refs.audio.currentTime; //当前播放时间
+            this.duration = this.$refs.audio.duration; //总播放时间
+          }
+        }, 1000);
       }
     },
     // 播放上一首
@@ -167,7 +175,6 @@ export default {
       for (var i in this.playingSongs) {
         if (this.musicId === this.playingSongs[i]) {
           if (i > 0) {
-            // 上一首
             i--;
             this.musicIndex--;
             this.musicId = this.playingSongs[i];
@@ -210,31 +217,38 @@ export default {
       this.showPic = !this.showPic;
       this.showLyric = !this.showLyric;
     },
-    // 播放歌词
-    playLyric() {
-      this.currentTime = this.$refs.audio.currentTime;
-      if (this.currentTime) {
-        if (
-          this.currentTime > this.musicLyric[this.flag][0] &&
-          this.currentTime < this.musicLyric[this.flag + 1][0]
-        ) {
-          this.lyric = this.musicLyric[this.flag][1];
-        }
-        this.flag =
-          this.flag === this.musicLyric.length - 2 ? 0 : this.flag + 1;
-      }
-      if (
-        this.currentTime > this.$refs.audio.duration ||
-        this.currentTime == this.$refs.audio.duration
-      ) {
-        this.showPauseIcon = true;
-        this.showPlayIcon = false;
-      }
-    },
+    // 滚动歌词
+    // playLyric() {
+    // if (this.currentTime) {
+    //   if (
+    //     this.currentTime > this.musicLyric[this.flag][0] &&
+    //     this.currentTime < this.musicLyric[this.flag + 1][0]
+    //   ) {
+    //     this.lyric = this.musicLyric[this.flag][1];
+    //   }
+    //   this.flag =
+    //     this.flag === this.musicLyric.length - 2 ? 0 : this.flag + 1;
+    // }
+    // if (
+    //   this.currentTime > this.$refs.audio.duration ||
+    //   this.currentTime == this.$refs.audio.duration
+    // ) {
+    //   this.showPauseIcon = true;
+    //   this.showPlayIcon = false;
+    // }
+    // },
   },
   beforeDestroy() {
     //页面关闭时清除定时器
     clearInterval(this.timmer);
+  },
+  watch: {
+    // 播放完直接切下一首
+    currentTime: function (v) {
+      if (v == this.duration) {
+        this.playNext();
+      }
+    },
   },
 };
 </script>

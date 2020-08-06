@@ -12,7 +12,7 @@
     <div class="recommand_music">
       <p class="title">
         <span>推荐歌单</span>
-        <span class="more">更多 》</span>
+        <span class="more" @click="goMore()">更多 》</span>
       </p>
       <div class="music_list">
         <div v-for="(item,index) in musicList" :key="index" @click="getMusicListDetail(item.id)">
@@ -29,7 +29,6 @@
     <div class="recommand_music">
       <p class="title">
         <span>最新音乐</span>
-        <span class="more">更多 》</span>
       </p>
       <div class="music_new">
         <div
@@ -109,6 +108,10 @@ export default {
       this.$router.push("/listen");
       // 播放歌曲的id 传给播放页面
       window.sessionStorage.setItem("musicId", id);
+    },
+    // 进入查看更多页面
+    goMore() {
+      this.$router.push("/more");
     },
   },
 };

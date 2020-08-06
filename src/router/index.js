@@ -7,7 +7,7 @@ import search from '@/components/search' //搜索页面
 import musicListDetail from '@/components/musicListDetail' //歌单详情页
 import listen from '@/components/listen' //听歌 页面
 
-
+import more from '@/components/more' //查看更多 页面
 
 
 
@@ -35,5 +35,8 @@ export default new Router({
     }, {
         path: '/listen',
         component: listen
+    }, {
+        path: '/more',
+        component: more
     }]
 })
