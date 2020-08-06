@@ -131,6 +131,12 @@ export default {
         });
         if (res.code == 200) {
           this.songs = res.songs;
+          // 正在播放的列表中的音乐id
+          let arr = [];
+          for (var i in res.songs) {
+            arr.push(res.songs[i].id);
+          }
+          window.sessionStorage.setItem("playingSongs", arr);
         }
       }
     },

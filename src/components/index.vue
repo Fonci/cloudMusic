@@ -34,6 +34,9 @@ export default {
       ],
     };
   },
+  mounted() {
+    window.sessionStorage.removeItem("playingSongs");
+  },
   methods: {
     changeTab(id, path) {
       this.tabIndex = id;
@@ -67,7 +70,7 @@ export default {
   color: #8991f7;
   border-bottom: 2px solid #8991f7;
 }
-.content_box{
+.content_box {
   margin-top: 2px;
 }
 </style>

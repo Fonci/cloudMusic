@@ -5,7 +5,7 @@
     <!-- 歌名 歌手 -->
     <div class="aboutMusic">
       <p>{{musicName}}</p>
-      <p style="color:#666;font-size:13px;margin-top:5px;">
+      <p style=";font-size:13px;margin-top:5px;">
         <span v-for="(item,index) in singer" :key="index">{{item.name}}&emsp;</span>
       </p>
     </div>
@@ -28,7 +28,7 @@
         <div
           v-for="(item,index) in musicLyric"
           :key="index"
-          :style="{'color':lyric==item[1]?'rgb(48, 139, 48)':'rgba(197, 188, 188, 0.884)'}"
+          :style="{'color':lyric===item[1]?'rgb(48, 139, 48)':'rgba(197, 188, 188, 0.884)'}"
         >{{item[1]}}</div>
       </div>
     </div>
@@ -38,7 +38,7 @@
       <img src="../assets/play_white.png" alt class="play_icon" />
       <!-- 播放 icon -->
       <div class="playbtn">
-        <img src="../assets/last.png" alt class="play_icon" />
+        <img src="../assets/last.png" alt class="play_icon" @click="playLast" />
         <img
           v-if="showPlayIcon"
           src="../assets/play_white.png"
@@ -53,13 +53,13 @@
           class="play_icon"
           @click="playMusic()"
         />
-        <img src="../assets/next.png" alt class="play_icon" />
+        <img src="../assets/next.png" alt class="play_icon" @click="playNext" />
       </div>
       <!-- 收藏 icon -->
       <img src="../assets/heart.png" alt class="play_icon" />
     </div>
     <!-- 播放源 -->
-    <audio ref="audio" :src="musicUrl" autoplay></audio>
+    <audio ref="audio" :src="musicUrl" controls autoplay></audio>
   </div>
 </template>
 
@@ -67,6 +67,8 @@
 export default {
   data() {
     return {
+      playingSongs: [], //所有的播放列表id
+      musicIndex: 0, //播放歌曲的index
       musicName: "",
       singer: [],
       rotate: true, //图片旋转
@@ -82,20 +84,33 @@ export default {
       currentTime: "",
       timmer: "",
       flag: 0, //控制歌词时间
+
       lyric: "",
-      lyric2: "",
-      lyric3: "",
     }; //
   },
   mounted() {},
   created() {
+    // 进入页面 获取所有播放歌单的id
+    if (window.sessionStorage.getItem("playingSongs")) {
+      this.playingSongs = window.sessionStorage
+        .getItem("playingSongs")
+        .split(",");
+    }
+
     this.musicId = window.sessionStorage.getItem("musicId");
-    this.$nextTick(() => {
-      this.getMusic(this.musicId);
-      this.getLyric(this.musicId);
-      this.getMusicUrl(this.musicId);
-    });
+
+    this.getMusic(this.musicId);
+    this.getLyric(this.musicId);
+    this.getMusicUrl(this.musicId);
+
+    // 切歌时使用下标判断歌曲id
+    for (var i in this.playingSongs) {
+      if (this.musicId === this.playingSongs[i]) {
+        this.musicIndex = i;
+      }
+    }
   },
+
   methods: {
     // 获取歌曲封面
     async getMusic(id) {
@@ -118,6 +133,7 @@ export default {
       var arr = res.lrc.lyric.split("\n");
       var timeArr = [];
       var timeReg = /\[\d{2}:\d{2}\.\d{3}\]/g;
+      this.musicLyric = [];
       for (var i in arr) {
         var time = arr[i].match(timeReg); //切割出所有的时间
         var value = arr[i].replace(timeReg, ""); //获取纯歌词文本
@@ -143,9 +159,38 @@ export default {
       });
       this.musicUrl = res.data[0].url;
       if (this.musicUrl) {
-        // this.timmer = setInterval(this.playLyric,200); //定时器
+        window.sessionStorage.setItem("musicUrl", this.musicUrl);
       }
     },
+    // 播放上一首
+    playLast() {
+      for (var i in this.playingSongs) {
+        if (this.musicId === this.playingSongs[i]) {
+          if (i > 0) {
+            // 上一首
+            i--;
+            this.musicIndex--;
+            this.musicId = this.playingSongs[i];
+            this.getMusic(this.musicId);
+            this.getLyric(this.musicId);
+            this.getMusicUrl(this.musicId);
+          }
+        }
+      }
+    },
+    // 播放下一首
+    playNext() {
+      this.musicIndex++;
+      for (var i in this.playingSongs) {
+        if (this.musicIndex < this.playingSongs.length) {
+          this.musicId = this.playingSongs[this.musicIndex];
+          this.getMusic(this.musicId);
+          this.getLyric(this.musicId);
+          this.getMusicUrl(this.musicId);
+        }
+      }
+    },
+
     // 播放歌曲
     playMusic() {
       this.i += 1;
@@ -282,8 +327,8 @@ p {
   width: 70%;
   height: 80%;
   margin: 0 auto;
-  border: 1px solid rgba(255, 0, 0, 0.486);
-  /* overflow: hidden; */
+  /* border: 1px solid rgba(255, 0, 0, 0.486); */
+  overflow: hidden;
   position: relative;
 }
 .lyric_box div {
