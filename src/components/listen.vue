@@ -24,12 +24,12 @@
     </div>
     <!-- 大歌词面板-->
     <div class="lyric" v-if="showLyric" @click="showLyricPage()">
-      <div class="lyric_box">
-        <div
+      <div class="lyric_box" :style="{'top': (200- 21 * (currentIndex + 1) + 'px')}">
+        <p
           v-for="(item,index) in musicLyric"
           :key="index"
-          :style="{'color':'rgba(197, 188, 188, 0.884)'}"
-        >{{item[1]}}</div>
+          :style="{'color': index === currentIndex ? 'green' : '#8e9ba1'}"
+        >{{item[1]}}</p>
       </div>
     </div>
     <!-- 按钮组 -->
@@ -82,6 +82,7 @@ export default {
       showPauseIcon: true, //显示暂停按钮
       i: 1, //控制播放暂停
       currentTime: "",
+      currentIndex: -1, //当前播放歌词的index
       duration: "",
       timmer: "",
       flag: 0, //控制歌词时间
@@ -145,9 +146,12 @@ export default {
               let t = time[j].slice(1, -1).split(":"); //t[0]分钟，t[1]秒
               let timeArr = parseInt(t[0], 10) * 60 + parseFloat(t[1]);
               this.musicLyric.push([timeArr, value]); //以[时间(秒)，歌词]的形式存进result
+            
             }
+             
           }
         }
+         console.log(this.musicLyric)
       } else {
         this.musicLyric.push([0, "暂无歌词"]);
       }
@@ -248,6 +252,13 @@ export default {
       if (v == this.duration) {
         this.playNext();
       }
+      let currentIndex = 0;
+      for (let i = 0; i < this.musicLyric.length; i++) {
+        if (v > this.musicLyric[i][0] - 1) {
+          currentIndex = i;
+        }
+      }
+      this.currentIndex = currentIndex;
     },
   },
 };
@@ -330,27 +341,28 @@ p {
 .lyric {
   padding: 100px 20px;
   position: fixed;
-  top: 50px;
+  top: 200px;
   left: 0;
   right: 0;
-  bottom: 90px;
+  bottom: 200px;
   color: white;
-  /* border: 1px solid rgba(0, 128, 0, 0.308); */
+  overflow: hidden;
+  border: 1px solid rgba(0, 128, 0, 0.308);
 }
 .lyric_box {
-  width: 70%;
-  height: 80%;
+  width: 100%;
+  height: 100%;
   margin: 0 auto;
   /* border: 1px solid rgba(255, 0, 0, 0.486); */
   overflow: hidden;
-  position: relative;
-}
-.lyric_box div {
-  margin-bottom: 5px;
-  overflow: hidden;
-
-  top: 0;
+  position: absolute;
   left: 0;
+  top: 0;
+  bottom: 50px;
+}
+.lyric_box p {
+  margin-bottom: 8px;
+  overflow: hidden;
 }
 .btns {
   width: 100%;

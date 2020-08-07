@@ -1,10 +1,16 @@
 <template>
-  <div class="wrap">
-    <p class="more_title">推荐歌单</p>
+  <!-- 查看更多页面 -->
+  <div class="wrap" ref="container">
     <!-- 歌单列表 -->
-    <div class="box">
+    <div class="box" ref="inner">
+      <p class="more_title">推荐歌单</p>
       <div class="music_list">
-        <div v-for="(item,index) in musicList" :key="index" @click="getMusicListDetail(item.id)">
+        <div
+          class="music"
+          v-for="(item,index) in musicList"
+          :key="index"
+          @click="getMusicListDetail(item.id)"
+        >
           <img class="recommand_music_pic" :src="item.picUrl" alt />
           <p class="listen_num">
             <i class="listen_icon"></i>
@@ -12,9 +18,9 @@
           </p>
           <p class="recommand_music_name">{{item.name}}</p>
         </div>
+        <div style="clear:both" />
       </div>
-
-      <div class="load_more" @click="loadMore()">点击加载更多↓</div>
+      <div style="clear:both" />
     </div>
   </div>
 </template>
@@ -25,22 +31,34 @@ export default {
     return {
       musicList: [],
       n: 1, //判断点击loadmore的数量
+      containerHeight: 0,
+      innerHeight: 0,
     };
   },
-  mounted() {},
-  created() {
+  mounted() {
     this.getRecommandMusic(12);
+    setTimeout(() => {
+      this.$nextTick(() => {
+        // this.clientHeight = `${document.documentElement.clientHeight}`; //屏幕可视化的高度；
+        this.containerHeight = this.$refs.container.clientHeight; //wrap 容器高度
+        this.innerHeight = this.$refs.inner.offsetHeight; //box容器的高度
+        this.$refs.container.addEventListener("scroll", this.loadMore);
+      });
+    }, 300);
   },
+  created() {},
   methods: {
     // 获取推荐歌单
     async getRecommandMusic(limit) {
-      const { data: res } = await this.$http.get("/personalized", {
-        params: {
-          limit: limit,
-        },
-      });
-      if (res.code == 200) {
-        this.musicList = res.result;
+      if (limit < 225) {
+        const { data: res } = await this.$http.get("/personalized", {
+          params: {
+            limit: limit,
+          },
+        });
+        if (res.code == 200) {
+          this.musicList = res.result;
+        }
       }
     },
     // 获取歌单详情
@@ -50,10 +68,16 @@ export default {
       // 点击进入歌单详情页
       this.$router.push("/musicListDetail");
     },
-    // 加载更多
-    loadMore() {
-      this.n++;
-      this.getRecommandMusic(12 * this.n);
+    // 触底加载更多
+    loadMore(e) {
+      this.innerHeight = this.$refs.inner.offsetHeight; //加载更多 高度会变化 要重新赋值
+      let scrollTop = e.target.scrollTop;
+      if (scrollTop + this.containerHeight == this.innerHeight) {
+        if (this.n < 18) {
+          this.n++;
+          this.getRecommandMusic(12 * this.n);
+        }
+      }
     },
   },
 };
@@ -61,8 +85,13 @@ export default {
 
 <style scoped>
 .wrap {
-  width: 100%;
-  height: auto;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border: 1px solid red;
+  overflow: auto;
 }
 p {
   margin: 0;
@@ -72,14 +101,10 @@ p {
   color: white;
   font-size: 20px;
   padding: 15px 0;
-}
-.box {
-  padding-top: 8px;
+  margin-bottom: 10px;
 }
 .music_list {
   width: 100%;
-  height: auto;
-  overflow: hidden;
   padding-left: 3px;
 }
 .recommand_music_pic {
@@ -91,7 +116,7 @@ p {
   border-radius: 3px;
   z-index: -1;
 }
-.music_list > div {
+.music_list .music {
   width: 32%;
   height: 180px;
   border-radius: 3px;
