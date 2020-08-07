@@ -24,7 +24,7 @@
     </div>
     <!-- 大歌词面板-->
     <div class="lyric" v-if="showLyric" @click="showLyricPage()">
-      <div class="lyric_box" :style="{'top': (200- 21 * (currentIndex + 1) + 'px')}">
+      <div class="lyric_box" :style="{'top': (150- 21 * (currentIndex + 1) + 'px')}">
         <p
           v-for="(item,index) in musicLyric"
           :key="index"
@@ -59,7 +59,7 @@
       <img src="../assets/heart.png" alt class="play_icon" />
     </div>
     <!-- 播放源 -->
-    <audio ref="audio" :src="musicUrl" controls autoplay></audio>
+    <audio ref="audio" :src="musicUrl" autoplay></audio>
   </div>
 </template>
 
@@ -92,7 +92,7 @@ export default {
   },
   mounted() {},
   created() {
-    // 进入页面 获取所有播放歌单的id
+    // 进入页面 获取所有播放歌单的id 用于切歌
     if (window.sessionStorage.getItem("playingSongs")) {
       this.playingSongs = window.sessionStorage
         .getItem("playingSongs")
@@ -146,12 +146,10 @@ export default {
               let t = time[j].slice(1, -1).split(":"); //t[0]分钟，t[1]秒
               let timeArr = parseInt(t[0], 10) * 60 + parseFloat(t[1]);
               this.musicLyric.push([timeArr, value]); //以[时间(秒)，歌词]的形式存进result
-            
             }
-             
           }
         }
-        //  console.log(this.musicLyric)
+        // console.log(this.musicLyric);
       } else {
         this.musicLyric.push([0, "暂无歌词"]);
       }
@@ -252,6 +250,7 @@ export default {
       if (v == this.duration) {
         this.playNext();
       }
+      // 歌词滚动
       let currentIndex = 0;
       for (let i = 0; i < this.musicLyric.length; i++) {
         if (v > this.musicLyric[i][0] - 1) {
@@ -259,6 +258,7 @@ export default {
         }
       }
       this.currentIndex = currentIndex;
+     
     },
   },
 };
@@ -341,10 +341,10 @@ p {
 .lyric {
   padding: 100px 20px;
   position: fixed;
-  top: 200px;
+  top: 100px;
   left: 0;
   right: 0;
-  bottom: 200px;
+  bottom: 100px;
   color: white;
   overflow: hidden;
   border: 1px solid rgba(0, 128, 0, 0.308);
@@ -354,7 +354,7 @@ p {
   height: 100%;
   margin: 0 auto;
   /* border: 1px solid rgba(255, 0, 0, 0.486); */
-  overflow: hidden;
+  /* overflow: hidden; */
   position: absolute;
   left: 0;
   top: 0;

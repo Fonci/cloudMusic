@@ -11,7 +11,13 @@
           :name="item.type"
           :label="item.area"
         >
-          <div class="singer_list" v-for="(item,index) in singerList" :key="item.id">
+          <div
+            class="singer_list"
+            v-for="(item,index) in singerList"
+            :key="item.id"
+            @click="goSingerMusic(item.id)"
+          >
+            <!-- 排序 -->
             <div class="singer_order">
               <p
                 style="font-size:18px;font-weight:bold;margin-top:25px;margin-bottom:8px;"
@@ -27,17 +33,19 @@
                 v-if="(index+1)<=item.lastRank"
               >-{{item.lastRank-(index+1)}}</p>
             </div>
+            <!-- 歌手照片 -->
             <img
               style="width:90px;height:80px;margin-left:15px;border-radius:5px;"
               :src="item.picUrl"
               alt
             />
+            <!-- 歌手姓名 -->
             <div style="margin-left:20px;text-align:left;">
               <p class="singer_name">
                 {{item.name}}
                 <span v-if="item.trans">{{item.trans}}</span>
               </p>
-              <p class="follow_people">{{item.score}}</p>
+              <p class="follow_people">热度：{{(item.score/10000).toFixed(2)}}万</p>
             </div>
           </div>
         </el-tab-pane>
@@ -168,14 +176,12 @@ export default {
     };
   },
   created() {
-    // 获得歌单id,获取歌单详情数据
+    // 获得歌单id,获取歌单详情所有歌曲数据
     this.MusicListId = window.sessionStorage.getItem("MusicListId");
     this.musicListType = window.sessionStorage.getItem("MusicListType"); //榜单类型
     if (this.musicListType == "rank") {
-      console.log("rank");
       this.getMusicList(this.MusicListId);
     } else {
-      console.log("singer");
       this.getSingerList(this.activeName);
     }
   },
@@ -208,7 +214,7 @@ export default {
         });
         if (res.code == 200) {
           this.songs = res.songs;
-          // 正在播放的列表中的音乐id
+          // 正在播放的列表中的所有音乐id 用于切歌
           let arr = [];
           for (var i in res.songs) {
             arr.push(res.songs[i].id);
@@ -239,12 +245,16 @@ export default {
       if (res.code == 200) {
         this.singerList = res.list.artists;
         this.singerUpdateTime = res.list.updateTime;
-        console.log(this.singerList);
       }
     },
-    //
+    //切换tabs
     handleClick() {
       this.getSingerList(this.activeName);
+    },
+    // 进入歌手所有歌曲详情
+    goSingerMusic(id) {
+      window.sessionStorage.setItem("singerId", id);
+      this.$router.push("/singerAllMusic");
     },
   },
 };
