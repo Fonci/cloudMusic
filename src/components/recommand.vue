@@ -4,7 +4,15 @@
     <div class="carousel">
       <el-carousel trigger="click" height="150px" indicator-position>
         <el-carousel-item v-for="(item,index) in bannerList" :key="index">
-          <img class="banner" :src="item.imageUrl" alt />
+          <a :href="item.url?item.url:'javascript:;'">
+            <img
+              class="banner"
+              :src="item.imageUrl"
+              alt
+              @click="item.targetType==1?goListen(item.encodeId):''"
+            />
+            <!--item.targetType==1 进入播放歌曲页面 -->
+          </a>
         </el-carousel-item>
       </el-carousel>
     </div>
@@ -76,6 +84,7 @@ export default {
       });
       if (res.code == 200) {
         this.bannerList = res.banners;
+        // console.log(res.banners);
       }
     },
     // 获取推荐歌单
@@ -90,7 +99,7 @@ export default {
       }
     },
     // 获取歌单详情
-    async getMusicListDetail(id) {
+    getMusicListDetail(id) {
       // 存储所点击歌单的id,获取歌单详情页面数据
       window.sessionStorage.setItem("MusicListId", id);
       // 点击进入歌单详情页
@@ -105,9 +114,11 @@ export default {
     },
     // 进入听歌页面
     goListen(id) {
-      this.$router.push("/listen");
-      // 播放歌曲的id 传给播放页面
-      window.sessionStorage.setItem("musicId", id);
+      if (id != 0) {
+        this.$router.push("/listen");
+        // 播放歌曲的id 传给播放页面
+        window.sessionStorage.setItem("musicId", id);
+      }
     },
     // 进入查看更多页面
     goMore() {

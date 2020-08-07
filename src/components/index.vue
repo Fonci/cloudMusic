@@ -5,7 +5,7 @@
     <!-- tab  -->
     <div class="tab_box">
       <div
-        :class="[tab.id==tabIndex?'tab tab_active':'tab']"
+        :class="[tab.id==tabIndex ?'tab tab_active':'tab']"
         v-for="tab in tabs"
         :key="tab.id"
         @click="changeTab(tab.id,tab.path)"
@@ -32,15 +32,25 @@ export default {
         { name: "排行榜", id: 2, path: "/rankList" },
         { name: "搜索", id: 3, path: "/search" },
       ],
+      routerPath: "",
     };
   },
   mounted() {
     window.sessionStorage.removeItem("playingSongs");
+    // 刷新页面直接跳回第一个tab页面
+    if (this.$route.path !== "/recommand") {
+      this.$router.push("/recommand");
+    }
   },
   methods: {
+    // 切换tab
     changeTab(id, path) {
       this.tabIndex = id;
-      this.$router.push(path);
+      this.routerPath = this.$route.path;
+      // 防止同一tab多次点击
+      if (this.routerPath !== path) {
+        this.$router.push(path);
+      }
     },
   },
 };

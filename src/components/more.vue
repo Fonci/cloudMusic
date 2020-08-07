@@ -85,12 +85,12 @@ export default {
 
 <style scoped>
 .wrap {
+  /* 固定大小 方便实现scroll功能 */
   position: absolute;
   left: 0;
   top: 0;
   right: 0;
   bottom: 0;
-  border: 1px solid red;
   overflow: auto;
 }
 p {

@@ -151,7 +151,7 @@ export default {
              
           }
         }
-         console.log(this.musicLyric)
+        //  console.log(this.musicLyric)
       } else {
         this.musicLyric.push([0, "暂无歌词"]);
       }
