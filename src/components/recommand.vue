@@ -102,6 +102,7 @@ export default {
     getMusicListDetail(id) {
       // 存储所点击歌单的id,获取歌单详情页面数据
       window.sessionStorage.setItem("MusicListId", id);
+      window.sessionStorage.setItem("MusicListType", "rank");
       // 点击进入歌单详情页
       this.$router.push("/musicListDetail");
     },

@@ -20,8 +20,7 @@ export default {
 }
 html,
 body,
-#app
- {
+#app {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
@@ -34,7 +33,7 @@ ul {
   border-radius: 20px;
 }
 /* 改造轮播图 分页器样式 */
-.el-carousel__indicator--horizontal{
+.el-carousel__indicator--horizontal {
   padding: 2px 3px;
 }
 .el-carousel__button {
@@ -42,5 +41,16 @@ ul {
   height: 8px;
   border-radius: 50%;
 }
-
+/* 歌手榜样式 */
+.singerRank .el-tabs__active-bar {
+  display: none !important;
+}
+.singerRank .el-tabs__nav {
+  float: none;
+  display: flex;
+  justify-content: space-around;
+}
+.singerRank .el-tabs__header {
+  margin: 0;
+}
 </style>

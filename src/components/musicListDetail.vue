@@ -1,82 +1,127 @@
 <template>
-  <!-- 歌单详情列表 -->
   <div class="wrap">
-    <!-- 歌单信息 -->
-    <div class="musicListInfo">
-      <!-- 图片部分-->
-      <div class="musicListInfo_top">
-        <div class="bg" :style="{'background-image':'url('+playlist.coverImgUrl+')'}"></div>
-        <!-- 图片 -->
-        <div class="pic_info">
-          <img :src="playlist.coverImgUrl" alt />
-          <span class="musicList_icon">歌单</span>
-          <p class="listen_num">
-            <i class="listen_icon"></i>
-            <span>{{(playlist.playCount/10000).toFixed(2)}}万</span>
-          </p>
-        </div>
-        <div style="margin-left:30px;width:60%;">
-          <p class="title">{{playlist.name}}</p>
-          <div style="text-align:left;margin-top:20px;">
-            <img class="avatar" :src="playlist.creator.avatarUrl" alt />
-            <span>{{playlist.creator.nickname}}</span>
+    <!-- 歌手榜详情 -->
+    <div class="singerRank" v-if="musicListType=='singer'">
+      <p class="singer_title">云音乐歌手榜</p>
+      <!-- tabs -->
+      <el-tabs v-model="activeName" @tab-click="handleClick">
+        <el-tab-pane
+          v-for="(item,index) in singerType"
+          :key="index"
+          :name="item.type"
+          :label="item.area"
+        >
+          <div class="singer_list" v-for="(item,index) in singerList" :key="item.id">
+            <div class="singer_order">
+              <p
+                style="font-size:18px;font-weight:bold;margin-top:25px;margin-bottom:8px;"
+              >{{index+1}}</p>
+              <p
+                class="up_down"
+                style="color:red;"
+                v-if="(index+1)>item.lastRank"
+              >+{{(index+1)-item.lastRank}}</p>
+              <p
+                class="up_down"
+                style="color:green;"
+                v-if="(index+1)<=item.lastRank"
+              >-{{item.lastRank-(index+1)}}</p>
+            </div>
+            <img
+              style="width:90px;height:80px;margin-left:15px;border-radius:5px;"
+              :src="item.picUrl"
+              alt
+            />
+            <div style="margin-left:20px;text-align:left;">
+              <p class="singer_name">
+                {{item.name}}
+                <span v-if="item.trans">{{item.trans}}</span>
+              </p>
+              <p class="follow_people">{{item.score}}</p>
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+    <!-- 排行榜/歌单详情 -->
+    <div class="rank" v-if="musicListType=='rank'">
+      <!-- 歌单信息 -->
+      <div class="musicListInfo">
+        <!-- 图片部分-->
+        <div class="musicListInfo_top">
+          <div class="bg" :style="{'background-image':'url('+playlist.coverImgUrl+')'}"></div>
+          <!-- 图片 -->
+          <div class="pic_info">
+            <img :src="playlist.coverImgUrl" alt />
+            <span class="musicList_icon">歌单</span>
+            <p class="listen_num">
+              <i class="listen_icon"></i>
+              <span>{{(playlist.playCount/10000).toFixed(2)}}万</span>
+            </p>
+          </div>
+          <div style="margin-left:30px;width:60%;">
+            <p class="title">{{playlist.name}}</p>
+            <div style="text-align:left;margin-top:20px;">
+              <img class="avatar" :src="playlist.creator.avatarUrl" alt />
+              <span>{{playlist.creator.nickname}}</span>
+            </div>
           </div>
         </div>
-      </div>
-      <!-- 信息部分 -->
-      <div class="musicListInfo_bottom">
-        <p class="tag">
-          标签：
-          <span
-            style="margin-right:5px;"
-            v-for="(tag,index) in playlist.tags"
-            :key="index"
-          >{{tag}}</span>
-        </p>
-        <p :class="showMore?'intro':'normal'">{{playlist.description}}</p>
-        <p style="text-align:right;">
-          <img
-            v-if="showMore"
-            style="width:14px;height;14px;"
-            src="../assets/down.png"
-            alt
-            @click="showMoreInfo()"
-          />
-          <img
-            v-else
-            style="width:14px;height;14px;"
-            src="../assets/up.png"
-            alt
-            @click="showMoreInfo()"
-          />
-        </p>
-      </div>
-    </div>
-    <!-- 歌曲列表 -->
-    <p
-      style="padding:10px 0 10px 10px;background-color:#eeeff0;color:#666;text-align:left;font-size:12px;"
-    >歌曲列表</p>
-    <!-- 歌单列表 -->
-    <div class="musicList">
-      <div class="music" v-for="(song,index) in songs" :key="index" @click="goListen(song.id)">
-        <div class="order">{{index+1}}</div>
-        <div style="width:85%;padding:15px 8px;overflow:hidden;">
-          <p
-            style="font-size:17px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-          >
-            {{song.name}}
-            <span style="color:#888;" v-if="song.alia[0]">({{song.alia[0]}})</span>
+        <!-- 信息部分 -->
+        <div class="musicListInfo_bottom">
+          <p class="tag">
+            标签：
+            <span
+              style="margin-right:5px;"
+              v-for="(tag,index) in playlist.tags"
+              :key="index"
+            >{{tag}}</span>
           </p>
-          <p
-            style="font-size:12px;margin:0;margin-top:10px;color:gray;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-          >
-            <span>{{song.ar[0].name}}</span>
-            <span v-if="song.ar.length>1">/{{song.ar[1].name}}</span>
-            <span>-</span>
-            {{song.al.name}}
+          <p :class="showMore?'intro':'normal'">{{playlist.description}}</p>
+          <p style="text-align:right;">
+            <img
+              v-if="showMore"
+              style="width:14px;height;14px;"
+              src="../assets/down.png"
+              alt
+              @click="showMoreInfo()"
+            />
+            <img
+              v-else
+              style="width:14px;height;14px;"
+              src="../assets/up.png"
+              alt
+              @click="showMoreInfo()"
+            />
           </p>
         </div>
-        <div class="play"></div>
+      </div>
+      <!-- 歌曲列表 -->
+      <p
+        style="padding:10px 0 10px 10px;background-color:#eeeff0;color:#666;text-align:left;font-size:12px;"
+      >歌曲列表</p>
+      <!-- 歌单列表 -->
+      <div class="musicList">
+        <div class="music" v-for="(song,index) in songs" :key="index" @click="goListen(song.id)">
+          <div class="order">{{index+1}}</div>
+          <div style="width:85%;padding:15px 8px;overflow:hidden;">
+            <p
+              style="font-size:17px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+            >
+              {{song.name}}
+              <span style="color:#888;" v-if="song.alia[0]">({{song.alia[0]}})</span>
+            </p>
+            <p
+              style="font-size:12px;margin:0;margin-top:10px;color:gray;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+            >
+              <span>{{song.ar[0].name}}</span>
+              <span v-if="song.ar.length>1">/{{song.ar[1].name}}</span>
+              <span>-</span>
+              {{song.al.name}}
+            </p>
+          </div>
+          <div class="play"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -86,6 +131,7 @@
 export default {
   data() {
     return {
+      // =====排行榜data=====
       showMore: true,
       MusicListId: "",
       playlist: {
@@ -95,12 +141,43 @@ export default {
       },
       ids: "",
       songs: {},
+      // =====歌手榜data=====
+      musicListType: "", //排行榜类型  分辨是否是歌手榜
+      // type : 地区 1: 华语 2: 欧美 3: 韩国 4: 日本
+      singerType: [
+        {
+          type: "1",
+          area: "华语",
+        },
+        {
+          type: "2",
+          area: "欧美",
+        },
+        {
+          type: "3",
+          area: "韩国",
+        },
+        {
+          type: "4",
+          area: "日本",
+        },
+      ],
+      activeName: "1",
+      singerList: [], //歌手列表
+      singerUpdateTime: "", //数据更新时间
     };
   },
   created() {
     // 获得歌单id,获取歌单详情数据
     this.MusicListId = window.sessionStorage.getItem("MusicListId");
-    this.getMusicList(this.MusicListId);
+    this.musicListType = window.sessionStorage.getItem("MusicListType"); //榜单类型
+    if (this.musicListType == "rank") {
+      console.log("rank");
+      this.getMusicList(this.MusicListId);
+    } else {
+      console.log("singer");
+      this.getSingerList(this.activeName);
+    }
   },
   methods: {
     // 获取歌单详情数据信息
@@ -150,6 +227,24 @@ export default {
       window.sessionStorage.setItem("musicId", id);
       // 进入播放页面
       this.$router.push("/listen");
+    },
+    // 查询歌手榜
+    async getSingerList(type) {
+      const { data: res } = await this.$http.get("/toplist/artist", {
+        params: {
+          type: type,
+        },
+      });
+
+      if (res.code == 200) {
+        this.singerList = res.list.artists;
+        this.singerUpdateTime = res.list.updateTime;
+        console.log(this.singerList);
+      }
+    },
+    //
+    handleClick() {
+      this.getSingerList(this.activeName);
     },
   },
 };
@@ -308,5 +403,35 @@ p {
   background-size: cover;
   margin-top: 25px;
   margin-right: 10px;
+}
+/* 歌手榜 */
+.singer_title {
+  background-color: #8991f7;
+  color: white;
+  font-size: 20px;
+  padding: 10px 0;
+}
+.singer_list {
+  display: flex;
+  padding: 8px 0 8px 15px;
+  /* justify-content: space-around; */
+  border-bottom: 1px solid rgba(180, 70, 70, 0.226);
+}
+.up_down {
+  font-size: 12px;
+}
+.singerRank p {
+  margin: 0;
+}
+.singerRank .singer_name {
+  margin-top: 18px;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.singerRank .follow_people {
+  font-size: 12px;
+  color: gray;
 }
 </style>
