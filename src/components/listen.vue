@@ -126,6 +126,10 @@ export default {
         this.musicIndex = i;
       }
     }
+    // setTimeout(() => {
+    //   this.currentTime = this.$refs.audio.currentTime;
+    //   console.log(this.$refs.audio.currentTime); //当前播放时间
+    // }, 300);
   },
 
   methods: {
@@ -255,9 +259,11 @@ export default {
       this.i += 1;
       if (this.i % 2 == 0) {
         this.$refs.audio.pause();
+
         clearInterval(this.timmer);
       } else {
         this.$refs.audio.play();
+
         this.timmer = setInterval(this.playLyric, 200);
       }
       this.showPlayIcon = !this.showPlayIcon;

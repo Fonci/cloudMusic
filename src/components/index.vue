@@ -38,7 +38,7 @@ export default {
   mounted() {
     window.sessionStorage.removeItem("playingSongs");
     // 刷新页面直接跳回第一个tab页面
-    if (this.$route.path !== "/recommand") {+
+    if (this.$route.path !== "/recommand") {
       this.$router.push("/recommand");
     }
   },
