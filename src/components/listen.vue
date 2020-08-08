@@ -4,10 +4,13 @@
     <div class="bg" :style="{'background-image':'url('+musicPic+')'}"></div>
     <!-- 歌名 歌手 -->
     <div class="aboutMusic">
-      <p>{{musicName}}</p>
-      <p style=";font-size:13px;margin-top:5px;">
-        <span v-for="(item,index) in singer" :key="index">{{item.name}}&emsp;</span>
-      </p>
+      <div class="back" @click="goBack"></div>
+      <div>
+        <p>{{musicName}}</p>
+        <p style=";font-size:13px;margin-top:5px;">
+          <span v-for="(item,index) in singer" :key="index">{{item.name}}&emsp;</span>
+        </p>
+      </div>
     </div>
     <!-- 歌曲封面 -->
     <div class="pic_box" v-if="showPic" @click="showLyricPage()">
@@ -19,8 +22,17 @@
           :style="{'animation':rotate?'rotate 10s linear infinite':'none'}"
         />
       </div>
-      <!-- 小歌词 -->
-      <!-- <p class="little_lyric">{{lyric}}</p> -->
+    </div>
+    <!-- 进度条 -->
+    <div class="progress">
+      <div style="width:100%;">
+        <div class="progress_bg"></div>
+        <div class="progress_move" :style="{'width':progressNum+'%'}"></div>
+      </div>
+    </div>
+    <div class="play_time">
+      <div>{{progressTime}}</div>
+      <div>{{fullTime}}</div>
     </div>
     <!-- 大歌词面板-->
     <div class="lyric" v-if="showLyric" @click="showLyricPage()">
@@ -88,6 +100,9 @@ export default {
       flag: 0, //控制歌词时间
 
       lyric: "",
+      progressNum: 0, //进度条数据
+      progressTime: "00:00", //进度条时间
+      fullTime: "00:00", //歌曲全部时间
     }; //
   },
   mounted() {},
@@ -114,6 +129,10 @@ export default {
   },
 
   methods: {
+    // 返回上一页
+    goBack() {
+      this.$router.go(-1);
+    },
     // 获取歌曲封面
     async getMusic(id) {
       const { data: res } = await this.$http.get("/song/detail", {
@@ -168,6 +187,37 @@ export default {
           if (this.$refs.audio) {
             this.currentTime = this.$refs.audio.currentTime; //当前播放时间
             this.duration = this.$refs.audio.duration; //总播放时间
+
+            // console.log(this.duration);
+            // 进度条总时间
+            if (this.duration < 60) {
+              this.fullTime =
+                parseInt(this.duration) > 10 || parseInt(this.duration) == 10
+                  ? "00:" + parseInt(this.duration)
+                  : "00:0" + parseInt(this.duration);
+            } else {
+              // 分钟
+              let minute =
+                this.duration / 60 < 10
+                  ? "0" + parseInt(this.duration / 60)
+                  : parseInt(this.duration / 60);
+              // 秒
+              let second =
+                parseInt(
+                  (this.duration / 60 - parseInt(this.duration / 60)) * 60
+                ) > 10 ||
+                parseInt(
+                  (this.duration / 60 - parseInt(this.duration / 60)) * 60
+                ) == 10
+                  ? parseInt(
+                      (this.duration / 60 - parseInt(this.duration / 60)) * 60
+                    )
+                  : "0" +
+                    parseInt(
+                      (this.duration / 60 - parseInt(this.duration / 60)) * 60
+                    );
+              this.fullTime = minute + ":" + second;
+            }
           }
         }, 1000);
       }
@@ -219,26 +269,6 @@ export default {
       this.showPic = !this.showPic;
       this.showLyric = !this.showLyric;
     },
-    // 滚动歌词
-    // playLyric() {
-    // if (this.currentTime) {
-    //   if (
-    //     this.currentTime > this.musicLyric[this.flag][0] &&
-    //     this.currentTime < this.musicLyric[this.flag + 1][0]
-    //   ) {
-    //     this.lyric = this.musicLyric[this.flag][1];
-    //   }
-    //   this.flag =
-    //     this.flag === this.musicLyric.length - 2 ? 0 : this.flag + 1;
-    // }
-    // if (
-    //   this.currentTime > this.$refs.audio.duration ||
-    //   this.currentTime == this.$refs.audio.duration
-    // ) {
-    //   this.showPauseIcon = true;
-    //   this.showPlayIcon = false;
-    // }
-    // },
   },
   beforeDestroy() {
     //页面关闭时清除定时器
@@ -258,7 +288,25 @@ export default {
         }
       }
       this.currentIndex = currentIndex;
-     
+
+      // 进度条
+      this.progressNum = (v / this.duration) * 100; //进度条滚动进度
+
+      // 进度条变化时间
+      if (v < 60) {
+        this.progressTime =
+          parseInt(v) < 10 ? "00:0" + parseInt(v) : "00:" + parseInt(v);
+      } else {
+        // 分钟
+        let minute = v / 60 < 10 ? "0" + parseInt(v / 60) : parseInt(v / 60);
+        // 秒
+        let second =
+          parseInt((v / 60 - parseInt(v / 60)) * 60) > 10 ||
+          parseInt((v / 60 - parseInt(v / 60)) * 60) == 10
+            ? parseInt((v / 60 - parseInt(v / 60)) * 60)
+            : "0" + parseInt((v / 60 - parseInt(v / 60)) * 60);
+        this.progressTime = minute + ":" + second;
+      }
     },
   },
 };
@@ -294,8 +342,18 @@ p {
 .aboutMusic {
   text-align: left;
   color: white;
-  padding: 5px 0 5px 10px;
+  padding: 5px 0 5px 8px;
   background-color: rgba(255, 255, 255, 0.096);
+  display: flex;
+}
+.back {
+  width: 30px;
+  height: 30px;
+  font-size: 30px;
+  background: url(../assets/back.png) no-repeat 0 0;
+  background-size: cover;
+  margin-top: 8px;
+  margin-right: 20px;
 }
 .pic_box {
   padding: 80px 20px;
@@ -303,18 +361,10 @@ p {
   top: 50px;
   left: 0;
   right: 0;
-  bottom: 90px;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.219);
+  bottom: 100px;
+  /* border-bottom: 1px solid rgba(128, 128, 128, 0.219); */
 }
-.little_lyric {
-  width: 100%;
-  position: absolute;
-  bottom: 50px;
-  left: 0;
-  text-align: center;
-  color: rgb(48, 139, 48);
-  /* border:1px solid red; */
-}
+
 .circle {
   width: 300px;
   height: 300px;
@@ -328,6 +378,7 @@ p {
   border-radius: 50%;
   margin-top: 50px;
   border: 1px solid transparent;
+
   /* animation: rotate 10s linear infinite; */
 }
 @keyframes rotate {
@@ -341,20 +392,18 @@ p {
 .lyric {
   padding: 100px 20px;
   position: fixed;
-  top: 100px;
+  top: 50px;
   left: 0;
   right: 0;
-  bottom: 100px;
+  bottom: 120px;
   color: white;
   overflow: hidden;
-  border: 1px solid rgba(0, 128, 0, 0.308);
+  /* border: 1px solid rgba(0, 128, 0, 0.308); */
 }
 .lyric_box {
   width: 100%;
   height: 100%;
   margin: 0 auto;
-  /* border: 1px solid rgba(255, 0, 0, 0.486); */
-  /* overflow: hidden; */
   position: absolute;
   left: 0;
   top: 0;
@@ -363,6 +412,39 @@ p {
 .lyric_box p {
   margin-bottom: 8px;
   overflow: hidden;
+}
+.progress {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  bottom: 100px;
+  color: white;
+}
+.progress_bg {
+  width: 100%;
+  height: 1px;
+  border-bottom: 3px solid rgb(197, 188, 188);
+  position: absolute;
+  left: 0;
+  bottom: 6px;
+}
+.progress_move {
+  width: 0%;
+  height: 1px;
+  border-bottom: 3px solid rgb(113, 211, 68);
+  position: absolute;
+  left: 0;
+  bottom: 6px;
+}
+.play_time {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  bottom: 85px;
+  color: white;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
 }
 .btns {
   width: 100%;
