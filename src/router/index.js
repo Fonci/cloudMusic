@@ -6,11 +6,8 @@ import rankList from '@/components/rankList' //排行榜
 import search from '@/components/search' //搜索页面
 import musicListDetail from '@/components/musicListDetail' //歌单详情页
 import listen from '@/components/listen' //听歌 页面
-
 import singerAllMusic from '@/components/singerAllMusic' //歌手的所有歌曲 页面
-
 import more from '@/components/more' //查看更多 页面
-
 
 
 Vue.use(Router)
